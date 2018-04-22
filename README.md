@@ -6,32 +6,31 @@ I will be documenting my experimentation with various data wrangling tools and m
 - optical character recognition (OCR) on tables, and text in columns
 - mapping various data structures into a unified dataset
 
-Everything below is a work in progress. 
-
 Maybe follow me on twitter if you want to know when a new readable chunk is completed: [@cynthiahqy](https://twitter.com/cynthiahqy)
 
-### About the project
+### About the Project
 
 **TASK**: Collect historical data about desktop laser printers from their introduction in 1984, up to the late 1990s. 
 
 **PURPOSE**: In a [Damaged Goods](https://en.wikipedia.org/wiki/Crippleware) market, manufacturers may intentionally restrict functionality of their product in order to price discriminate. 
-Home laser printers can be considered damaged goods as explained in the excerpt below. 
+Home laser printers can be considered damaged goods as explained in the excerpt below. This data set will be used to examine and describe the evolution and dynamics of the market from entry to diffusion.
 
-**METHOD** From 1984 to 1996, PC Magazine published reviews of every new printer in their annual printer edition
+**METHOD** From 1984 to 1996, PC Magazine published reviews of every new printer on the market in their annual printer edition. This includes details on price, printer performance and features, as well as general commentary on market trends. 
 
-### Literature Review
+### Related Reading
 
-**Deneckere, Raymond J., and R. Preston McAfee. "Damaged goods." Journal of Economics & Management Strategy 5.2 (1996): 149-174.**
+#### Deneckere, Raymond J., and R. Preston McAfee. "Damaged goods." Journal of Economics & Management Strategy 5.2 (1996): 149-174. 
 
 > 2.2 IBM LASERPRINTER E
-In May 1990, IBM announced the introduction of the Laserprinter E,
+
+> In May 1990, IBM announced the introduction of the Laserprinter E,
 a lower cost alternative to its popular Laserprinter. The Laserprinter
 E was virtually identical to the original Laserprinter, except that the
 E model printed text at 5 pages per minute (ppm), as opposed to 10
 ppm for the Laserprinter. According to Jones (1990), the Laserprinter
 E uses the same ”engine” and virtually identical parts, with one exception:
 
-The controllers in our evaluation unit differed only by virtue
+> The controllers in our evaluation unit differed only by virtue
 of four socketed firmware chips and one surface
 mounted chip. PC Labs’ testing of numerous evaluation
 units indicated that the Laserprinter E firmware in effect
@@ -50,6 +49,6 @@ IIP. For an additional $1099, one can upgrade the LaserPrinter
 E to identical performance with the Laserprinter, bringing the total
 cost of the upgraded Laserprinter E to $200 more than the original
 Laserprinter.
->
+
 
 
