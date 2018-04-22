@@ -6,7 +6,7 @@ I will be documenting my experimentation with various data wrangling tools and m
 - optical character recognition (OCR) on tables, and text in columns
 - mapping various data structures into a unified dataset
 
-Maybe follow me on twitter if you want to know when a new readable chunk is completed: [@cynthiahqy](https://twitter.com/cynthiahqy)
+Click here for updates: [@cynthiahqy](https://twitter.com/cynthiahqy)
 
 ### About the Project
 
@@ -19,7 +19,7 @@ Home laser printers can be considered damaged goods as explained in the excerpt 
 
 ### Related Reading
 
-#### Deneckere, Raymond J., and R. Preston McAfee. "Damaged goods." Journal of Economics & Management Strategy 5.2 (1996): 149-174. 
+#### [Deneckere, Raymond J., and R. Preston McAfee. "Damaged goods." Journal of Economics & Management Strategy 5.2 (1996): 149-174.](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.476.6124&rep=rep1&type=pdf)
 
 > 2.2 IBM LASERPRINTER E
 
