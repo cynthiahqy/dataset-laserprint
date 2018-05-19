@@ -3,6 +3,11 @@
 *.pdf
 *.jpg
 
+# Exclude data files
+
+*.csv
+*.xlx*
+*.txt
 
 # Created by RStudio
 
