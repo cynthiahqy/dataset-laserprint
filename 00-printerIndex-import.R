@@ -20,7 +20,7 @@ read_then_csv <- function(sheet, path) {
     tools::file_path_sans_ext()
   path %>%
     read_excel(sheet = sheet) %>% 
-    write_csv(paste0("hand_csv/",pathbase, "-", sheet, ".csv"))
+    write_csv(paste0("cache-printerIndex/", sheet, "-", pathbase, "-00.csv"))
 }
 
 path %>%
@@ -28,4 +28,4 @@ path %>%
   set_names() %>%
   map(read_then_csv, path = path)
 
-## imported 1987, 88, 99 on 19 May, 2017
+## imported 1987, 88, 99 on 19 May, 2017 > cache-printerIndex/yyyy-printIndex-00.csv
