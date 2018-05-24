@@ -1,9 +1,17 @@
+# RUN EVERYTIME
 library(tidyverse)
 library(stringr)
+library(here)
 
-index_1987 <- read_csv('hand_csv/handtype_printerIndex-1987.csv')
+index_df <- list()
+cache_list <- data.frame()
 
-## ------ rename columns
+# 01 IMPORT printerIndex-00 (raw entries)
+
+index_df[[1]] = read_csv(here('cache-printerIndex','1987-printerIndex-00.csv'))
+
+# 02 Rename columns 
+
 new_cols <- function(x) {
   x %>%
   str_to_lower() %>%
@@ -11,24 +19,36 @@ new_cols <- function(x) {
   str_remove_all('\\.')
 }
 
-# new_cols(colnames(index_1987))
+# TEST: new_cols(colnames(index_df[[1]]))
 
-index_1987 <- index_1987 %>% 
+index_df[[2]] = index_df[[1]] %>% 
   rename_all(new_cols) 
 
-# colnames(index_1987)
+# TEST: colnames(index_df[[2]])
 
-# ---- drop columns
+# 03 Drop columns 
 drop <- c("Replaced By","Pg.","Reader service number", "Note", "Type") %>%
   new_cols
 
-index_1987 <- index_1987 %>%
+index_df[[3]] <- index_df[[2]] %>%
   select(-one_of(drop))
+
+## CACHE: 03
+cache_path = here('cache-printerIndex','1987-printerIndex-03.xlsx')
+write_csv(index_df[[3]], path = cache_path)
+
+
+# 04 Check for Errors
+## IMPORT: 03 (raw less columns)
+
+index_df[[3]] <- read_csv(cache_path)
+
+
 
 ## ------ Check for input errors
 
 # number ranges
-index_1987 %>%
+index_df %>%
   select_if(is.numeric) %>%
   summary()
 
@@ -78,6 +98,30 @@ years <- volumes + 1981
 # 1 FIX speed
 
 # cps to ppm: BASED ON note on page 420: 123 cps = 7.4 ppm >> 1 cps = 1/16.6
+
+cps_2_ppm <- function(x) {
+  x / 16.6
+}
+
+index_df$speed_unit
+
+speed_info <- data.frame (
+  unit = c("ppm", "cps"),
+  conv = c(1, 1/16.6),
+  test = c("dont", "do")
+)
+
+id <- match(index_df$speed_unit, speed_info$unit)
+speed_info[id, ]
+
+index_df <- index_df %>%
+  mutate(n_speed = speed)
+
+
+
+index_df[index_df$speed_unit == "cps", "n_speed"] <- 0
+
+
 
 index_1987 %>%
   filter(speed_unit == "cps") %>%
