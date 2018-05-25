@@ -13,10 +13,6 @@ new_cols <- function(x) {
     str_remove_all('\\.')
 }
 
-# namebase <- wbook %>%
-#   basename() %>%
-#   tools::file_path_sans_ext()
-
 namebase <- "printerIndex"
 
 # function to read, rename, and write to csv
