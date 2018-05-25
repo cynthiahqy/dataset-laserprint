@@ -6,36 +6,20 @@ library(here)
 index_df <- list()
 cache_list <- data.frame()
 
-# 01 IMPORT printerIndex-00 (raw entries)
+# 01 IMPORT printerIndex-00 (raw VALIDATED entries)
 
 index_df[[1]] = read_csv(here('cache-printerIndex','1987-printerIndex-00.csv'))
 
-# 02 Rename columns 
-
-new_cols <- function(x) {
-  x %>%
-  str_to_lower() %>%
-  str_replace_all(" ","_") %>%
-  str_remove_all('\\.')
-}
-
-# TEST: new_cols(colnames(index_df[[1]]))
-
-index_df[[2]] = index_df[[1]] %>% 
-  rename_all(new_cols) 
-
-# TEST: colnames(index_df[[2]])
-
 # 03 Drop columns 
-drop <- c("Replaced By","Pg.","Reader service number", "Note", "Type") %>%
+drop <- c("replaced_by", "pg", "reader_service_number", "note", "type") %>%
   new_cols
 
-index_df[[3]] <- index_df[[2]] %>%
+index_df[[2]] <- index_df[[1]] %>%
   select(-one_of(drop))
 
 ## CACHE: 03
-cache_path = here('cache-printerIndex','1987-printerIndex-03.xlsx')
-write_csv(index_df[[3]], path = cache_path)
+cache_path = here('cache-printerIndex','1987-printerIndex-02.csv')
+write_csv(index_df[[2]], path = cache_path)
 
 
 # 04 Check for Errors
