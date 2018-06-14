@@ -11,8 +11,8 @@ cache_list <- data.frame()
 index_df[[1]] = read_csv(here('cache-printerIndex','1987-printerIndex-00.csv'))
 
 # 03 Drop columns 
-drop <- c("replaced_by", "pg", "reader_service_number", "note", "type") %>%
-  new_cols
+
+drop <- c("replaced_by", "pg", "reader_service_number", "note", "type")
 
 index_df[[2]] <- index_df[[1]] %>%
   select(-one_of(drop))
