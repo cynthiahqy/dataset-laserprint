@@ -1,5 +1,29 @@
+##----- CREATED BY ME
 
-# Created by https://www.gitignore.io/api/macos,jupyternotebook,vim
+# Exclude source images 
+
+*.pdf
+*.jpg
+
+# Exclude data files
+
+log
+spreadsheets
+images
+research
+*.csv
+*.xlx*
+*.txt
+
+##----- Created by RStudio
+
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+##----- Created by https://www.gitignore.io/api/jupyternotebook,macos,microsoftoffice,vim
+
 
 ### JupyterNotebook ###
 .ipynb_checkpoints
@@ -8,6 +32,7 @@
 # Remove previous ipynb_checkpoints
 #   git rm -r .ipynb_checkpoints/
 #
+
 ### macOS ###
 *.DS_Store
 .AppleDouble
@@ -35,6 +60,24 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+### MicrosoftOffice ###
+*.tmp
+
+# Word temporary
+~$*.doc*
+
+# Excel temporary
+~$*.xls*
+
+# Excel Backup File
+*.xlk
+
+# PowerPoint temporary
+~$*.ppt*
+
+# Visio autosave temporary files
+*.~vsd*
+
 ### Vim ###
 # swap
 .sw[a-p]
@@ -47,5 +90,3 @@ Session.vim
 # auto-generated tag files
 tags
 
-
-# End of https://www.gitignore.io/api/macos,jupyternotebook,vim
