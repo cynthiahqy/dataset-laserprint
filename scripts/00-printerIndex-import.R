@@ -2,8 +2,9 @@
 
 library(tidyverse)
 library(readxl)
+library(here)
 
-wbook <- "/Users/cynthiahqy/Dropbox/RA-LaserPrinter/images/printerIndex/handtype_printerIndex.xlsx"
+wbook <- here("spreadsheets/handtype_printerIndex.xlsx")
 
 # generate new column names
 new_cols <- function(x) {

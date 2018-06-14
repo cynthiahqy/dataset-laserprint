@@ -1,5 +1,13 @@
 ##----- CREATED BY ME
 
+# Exclude folders
+
+log
+spreadsheets
+images
+research
+
+
 # Exclude source images 
 
 *.pdf
@@ -7,10 +15,6 @@
 
 # Exclude data files
 
-log
-spreadsheets
-images
-research
 *.csv
 *.xlx*
 *.txt
