@@ -7,14 +7,15 @@ library(here)
 wbook <- here("spreadsheets/handtype_printerIndex.xlsx")
 
 # function to read, rename, and write to csv
-# generate new column names
+# generate new column names (z denotes hand entered data)
 read_rename_csv <- function(sheet, path) {
   namebase <- "pIndex"
   new_cols <- function(x) {
     x %>%
       str_to_lower() %>%
-      str_replace_all(" ","_") %>%
-      str_remove_all('\\.')
+      str_replace_all(" ", "_") %>%
+      str_remove_all('\\.') %>%
+      str_c("z.", .)
   }
   path %>%
     read_excel(sheet = sheet) %>% 
