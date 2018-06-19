@@ -89,7 +89,7 @@ l.index1$`1987`[l.index1$`1987`$c.price_type == "z.current_price", "price_year"]
 
 # create c.conversion variable
 # add speed_ppm variable
-l.index1$`1987` <- full_join(l.index1$`1987`, cps2ppm) %>%
+l.index1$`1987` <- inner_join(l.index1$`1987`, cps2ppm) %>%
   mutate(speed_ppm = z.speed * c.conversion,
          company = z.company,
          product = z.product) %>%
@@ -98,7 +98,7 @@ l.index1$`1987` <- full_join(l.index1$`1987`, cps2ppm) %>%
 # TIDY 1988----
 
 l.index1$`1988` <- l.index0$`1988` %>%
-  full_join(cps2ppm) %>%
+  inner_join(cps2ppm) %>%
   mutate(company = z.company_name,
          product = z.product,
          price_year = c.index_year, #default is price_type == current_price
@@ -109,7 +109,7 @@ l.index1$`1988` <- l.index0$`1988` %>%
 # TIDY 1989 to 1992----
 
 tidy_index1 <- function(x) {
-  full_join(x, cps2ppm) %>%
+  inner_join(x, cps2ppm) %>%
     mutate(company = z.company_name,
            product = z.product,
            price_year = c.index_year,
