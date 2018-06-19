@@ -2,21 +2,43 @@ library(here)
 library(tidyverse)
 library(validate)
 
-# 1987
+# initialise lists ----
+pIndex <- list()
+pIndex_names <- list()
+
+# import cache csv ----
 
 # load cached data, with restrictions from raw pages
 # pIndex_spec <- spec_csv(here('cache-printerIndex','1987-printerIndex-00.csv'))
 
-pIndex <- here('cache-printerIndex','1987-printerIndex-00.csv') %>%
-  read_csv(col_types = cols(
-    type = col_factor(levels = c("L")),
-    speed_unit = col_factor(levels = c("ppm", "cps")),
-    vol = col_factor(levels = 3:6),
-    no = col_factor(levels = c(19, 23)),
-    index_page = col_factor(levels = c(420, 421, 422, 427, 428))
-    )) 
+path2cache <- 'spreadsheets/cache'
+lookup_years <- c(1987, 1988, 1989, 1990, 1991, 1992)
 
-cols_1987 <- colnames(pIndex)
+# import_1987 <- function() { 
+  i <- 1
+  index_year <- i + 1986
+  pIndex[[i]] <- here(path2cache, paste0('pIndex-', index_year, '-00.csv')) %>%
+    read_csv(col_types = cols(
+      z.type = col_factor(levels = c("L")),
+      z.speed_unit = col_factor(levels = c("ppm", "cps")),
+      z.vol = col_factor(levels = 3:6),
+      z.no = col_factor(levels = c(19, 23)),
+      z.index_page = col_factor(levels = c(420, 421, 422, 427, 428))
+      )) 
+  # pIndex_names[[i]] <- colnames(pIndex[[i]])
+
+# import_1988
+  i = i + 1
+  index_year <- i + 1986
+  
+  pIndex[[i]] <- here(path2cache, paste0('pIndex-', index_year, '-00.csv')) %>%
+    read_csv(col_types = cols(
+      z.type = col_factor(levels = c("L")),
+      z.speed_unit = col_factor(levels = c("ppm",u "cps")),
+      z.vol = col_factor(levels = 3:7),
+      z.no = col_factor(levels = c(18, 19, 23)),
+      z.index_page = col_factor(levels = c(339, 340, 343, 344, 347, 349))
+    )) 
 
 ## SHOULD BE A FUNCTION! ------
 # check factor cols for entry errors
@@ -82,14 +104,7 @@ drop_csv(year)
 
 # 1988
 
-pIndex <- here('cache-printerIndex','1988-printerIndex-00.csv') %>%
-  read_csv(col_types = cols(
-    type = col_factor(levels = c("L")),
-    speed_unit = col_factor(levels = c("ppm", "cps")),
-    vol = col_factor(levels = 3:7),
-    no = col_factor(levels = c(18, 19, 23)),
-    index_page = col_factor(levels = c(339, 340, 343, 344, 347, 349))
-  )) 
+
 
 cols_1988 <- colnames(pIndex)
 

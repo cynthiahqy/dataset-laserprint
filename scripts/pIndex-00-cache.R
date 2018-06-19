@@ -5,6 +5,7 @@ library(readxl)
 library(here)
 
 wbook <- here("spreadsheets/handtype_printerIndex.xlsx")
+path2cache <- here("spreadsheets/cache/pIndex/")
 
 # function to read, rename, and write to csv
 # generate new column names (z denotes hand entered data)
@@ -20,7 +21,20 @@ read_rename_csv <- function(sheet, path) {
   path %>%
     read_excel(sheet = sheet) %>% 
     rename_all(new_cols) %>%
-    write_csv(paste0(here(),"/spreadsheets/cache/", namebase, "-", sheet, "-00.csv"))
+    mutate(
+      c.index_year = sheet,
+      c.review_year = z.vol + 1981,
+      z.reader_service_number = NULL,
+      z.pg = NULL,
+      z.note = NULL,
+      z.type = NULL,
+      z.company_name_note = NULL,
+      z.editors_choice = NULL,
+      z.index_page = NULL,
+      z.review_note = NULL,
+      z.replaced_by = NULL
+      ) %>%
+    write_csv(paste0(path2cache, namebase, "-", sheet, "-00.csv"))
 }
 
 # pipe xlsx to map(read_rename_csv)
@@ -29,4 +43,31 @@ wbook %>%
   set_names() %>%
   map(read_rename_csv, path = wbook)
 
-## imported 1987, 88, 99 on 19 May, 2017 > cache-printerIndex/yyyy-printIndex-00.csv
+# read cached files back into R
+
+names_csv <- list.files(path2cache, pattern="*00.csv")
+l.index <- lapply(str_c(path2cache, names_csv), read_csv) %>% 
+  set_names(c("1987", "1998", "1989", "1990", "1991", "1992"))
+
+# price_type2year(l.index$`1987`)
+# 
+# price_type2year()
+# mutate(
+#   flag_original = (price_type == "z.original_price"),
+#   price_date = flag_original * c.index_year
+# )
+
+l.index$`1987` <- gather(l.index$`1987`, z.original_price, z.current_price, key = "c.price_type", value = "price") %>%
+  mutate(price_year = c.review_year) 
+
+l.index$`1987`[l.index$`1987`$c.price_type == "z.current_price", "price_year"] <- 1987
+
+l.index$`1987` %>% View()
+
+
+
+  
+  
+
+
+
