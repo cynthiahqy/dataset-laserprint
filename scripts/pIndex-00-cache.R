@@ -47,7 +47,7 @@ wbook %>%
 
 names_csv <- list.files(path2cache, pattern="*00.csv")
 l.index <- lapply(str_c(path2cache, names_csv), read_csv) %>% 
-  set_names(c("1987", "1998", "1989", "1990", "1991", "1992"))
+  set_names(1987:1992)
 
 # price_type2year(l.index$`1987`)
 # 
@@ -57,12 +57,38 @@ l.index <- lapply(str_c(path2cache, names_csv), read_csv) %>%
 #   price_date = flag_original * c.index_year
 # )
 
-l.index$`1987` <- gather(l.index$`1987`, z.original_price, z.current_price, key = "c.price_type", value = "price") %>%
-  mutate(price_year = c.review_year) 
+# gather c.price_type (doubles length of tibble)
+# add variable price_year
 
+l.index$`1987` <- l.index$`1987` %>% 
+  rename(z.company_name = z.company) %>%
+  mutate(price_year = c.review_year) %>%
+  gather(z.original_price, z.current_price, key = "c.price_type", value = "price")
+
+# set price_year <- c.index_year if c.price_type == z.current_price
 l.index$`1987`[l.index$`1987`$c.price_type == "z.current_price", "price_year"] <- 1987
 
-l.index$`1987` %>% View()
+# specify conversion from cps to ppm
+cps2ppm <- tribble(
+  ~z.speed_unit, ~c.conversion,
+  "cps", 1/16,
+  "ppm", 1
+)
+# create c.conversion variable
+# add speed_ppm variable
+full_join(l.index$`1987`, cps2ppm) %>%
+  mutate(speed_ppm = z.speed * c.conversion)
+
+list_companies <- function(x) {
+  unique(x$z.company_name) %>%
+    sort()
+}
+
+l.companies <- lapply(l.index, list_companies)
+
+lapply(l.companies, View)
+
+l.index$`1989` %>% View()
 
 
 
