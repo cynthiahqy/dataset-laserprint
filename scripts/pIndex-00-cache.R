@@ -149,9 +149,36 @@ check_rows()
 
 ##
 
+index2 %>%
+  group_by(company)
+
+unique(index2$company) %>%
+  sort() %>% View()
+
+## write loop agrep(company[i], company[i + 1]) to find typos
+
+unique_company <- unique(index2$company) %>% sort()
+agrep_company <- c()
+
+for (i in c(1:(length(unique_company) - 1))) {
+  # print(i)
+  agrep_company[i] <- agrepl(unique_company[i], unique_company[i + 1])
+}
+
+for (i in which(agrep_company == TRUE)) {
+  print(i:(i + 1))
+  print(unique_company[i:(i + 1)])
+}
+
+## TODO: corrections for unique company typos (store as cache?)
+
+### test
+
+is.null(length(agrep_company))
 
 
 
+## TODO: 
 
 
 
