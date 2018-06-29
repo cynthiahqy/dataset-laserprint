@@ -1,4 +1,4 @@
-# Import from Dropbox/handtype_printerIndex.xlsx to .Rproj/cache
+# Import Dropbox/handtype_printerIndex.xlsx sheets to .Rproj/cache
 
 library(tidyverse)
 library(readxl)
@@ -133,7 +133,7 @@ bind_rows(l.index1) %>%
   select(c(pIndex, company, product, price_year, price, speed_ppm, review)) %>%
   write_csv(paste0(path2cache, "pIndex-02-ALL.csv"))
 
-# Exploration----
+# Validation----
 
 index2 <- read_csv(paste0(path2cache, "pIndex-02-ALL.csv"))
 
@@ -155,53 +155,7 @@ index2 %>%
 unique(index2$company) %>%
   sort() %>% View()
 
-## write loop agrep(company[i], company[i + 1]) to find typos
 
-unique_company <- unique(index2$company) %>% sort()
-agrep_company <- c()
-
-for (i in c(1:(length(unique_company) - 1))) {
-  # print(i)
-  agrep_company[i] <- agrepl(unique_company[i], unique_company[i + 1])
-}
-
-for (i in which(agrep_company == TRUE)) {
-  print(i:(i + 1))
-  print(unique_company[i:(i + 1)])
-}
-
-## TODO: corrections for unique company typos (store as cache?)
-
-### test
-
-is.null(length(agrep_company))
-
-
-
-## TODO: 
-
-
-
-
-
-# VALIDATE
-
-
-
-## LIST UNIQUE COMPANIES----
-# TODO: count no. of products / company / year
-
-# list_companies <- function(x) {
-#   unique(x$z.company_name) %>%
-#     sort()
-# }
-# 
-# l.companies <- lapply(l.index, list_companies)
-# 
-# 
-# lapply(l.companies, View)
-# 
-# l.index$`1989` %>% View()
 
 
 
