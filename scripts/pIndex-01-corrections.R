@@ -26,21 +26,42 @@ index2 <- read_csv(paste0(path2cache, "pIndex-02-ALL.csv"))
 
 l.unique <- list()
 l.agrep <- list()
+l.fuzzy_match1 <- list()
 
-fuzzy_match1 <- function(v.unique) {
-  n_pairs <- (length(v.unique) - 1)
+fuzzy_match1 <- function(df, var) {
+  col_name <- deparse(substitute(var))
+  col_vals <- eval(substitute(df))[[col_name]]
+  unique_names <- col_vals %>% unique() %>% sort()
+  n_pairs <- (length(unique_names) - 1)
   v.agrep <- c()
   for (i in c(1:n_pairs)) {
-    v.agrep[i] <- agrepl(v.unique[i], v.unique[i + 1])
+    v.agrep[i] <- agrepl(unique_names[i], unique_names[i + 1])
   }
+  agrep_TRUE <- matrix(ncol = 4)
   for (i in which(v.agrep == TRUE)) {
-    print(i:(i + 1))
-    print(v.unique[i:(i + 1)])
+    agrep_TRUE <- rbind(agrep_TRUE, c(i, unique_names[i], i + 1, unique_names[i + 1]))
+    # print(i:(i + 1))
+    # print(unique_names[i:(i + 1)])
   }
-  v.agrep
+  # l.agrep[[col_name]] <<- v.agrep
+  table.matches <- agrep_TRUE[-1,1:4]
+  colnames(table.matches) <- c("index1", "name1", "index2", "name2")
+  l.fuzzy_match1[[col_name]] <<- as.tibble(table.matches)
 }
 
+fuzzy_match1(index2, company)
+fuzzy_match1(index2, product)
+l.fuzzy_match1
+
 fuzzy_match1(unique(index2$company) %>% sort())
+
+test <- function(df, var) {
+  eval(substitute(df))[[deparse(substitute(var))]]
+}
+
+eval(substitute(index2))[[deparse(substitute(company))]]
+
+eval(as.name("index2"))$company
 
 # Company
 
