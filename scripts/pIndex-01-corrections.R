@@ -25,6 +25,22 @@ index2 <- read_csv(paste0(path2cache, "pIndex-02-ALL.csv"))
 ## initialise
 
 l.unique <- list()
+l.agrep <- list()
+
+fuzzy_match1 <- function(v.unique) {
+  n_pairs <- (length(v.unique) - 1)
+  v.agrep <- c()
+  for (i in c(1:n_pairs)) {
+    v.agrep[i] <- agrepl(v.unique[i], v.unique[i + 1])
+  }
+  for (i in which(v.agrep == TRUE)) {
+    print(i:(i + 1))
+    print(v.unique[i:(i + 1)])
+  }
+  v.agrep
+}
+
+fuzzy_match1(unique(index2$company) %>% sort())
 
 # Company
 
