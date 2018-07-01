@@ -1,5 +1,6 @@
 # Import Dropbox/handtype_printerIndex.xlsx sheets to .Rproj/cache
 
+# INITIALISE SESSION ----
 library(tidyverse)
 library(readxl)
 library(here)
@@ -13,7 +14,7 @@ write_csv_no <- function(.data, sheet, no) {
   write_csv(.data, paste0(path2cache, namebase, "-", no, "-", sheet, ".csv"))
 }
 
-# READ xlsx to cache----
+# READ and CACHE handtype.xlsx ----
 # function to read, rename, and write to csv
 # generate new column names (z denotes hand entered data)
 read_rename_csv <- function(sheet, path) {
@@ -126,34 +127,28 @@ l.index0[[4]] %>%
 l.index1[3:6] <- lapply(l.index0[3:6], tidy_index1)
 set_names(l.index1[3:6], c(1989:1992)) 
 
+# COMBINE, CHECK and CACHE tidy l.index1 ----
 
-bind_rows(l.index1) %>%
+## combine all years into single tibble
+index1 <- bind_rows(l.index1) %>%
   mutate(pIndex = c.index_year) %>%
   unite(review, z.vol, z.no, sep = "-") %>%
   select(c(pIndex, company, product, price_year, price, speed_ppm, review)) %>%
-  write_csv(paste0(path2cache, "pIndex-02-ALL.csv"))
-
-# Validation----
-
-index2 <- read_csv(paste0(path2cache, "pIndex-02-ALL.csv"))
+  rowid_to_column()
 
 ## check l.index0 and l.index1 no. rows match
 check_rows <- function() {
-  nrows_00 <- sapply(c(1:6), function(x) dim.data.frame(l.index0[[x]])) %>% .[1, ] %>% sum() + nrow(l.index0[[1]])
-  nrows_01 <- dim.data.frame(bind_rows(l.index1)) %>% .[1]
-  nrows_02 <- dim.data.frame(index2) %>% .[1]
+  nrows_00 <- sapply(c(1:6), function(x) dim.data.frame(l.index0[[x]])) %>% .[1, ] %>% sum() + nrow(l.index0[[1]]) #sum rows l.index0
+  nrows_01 <- dim.data.frame(bind_rows(l.index1)) %>% .[1] #sum rows l.index1
+  nrows_02 <- dim.data.frame(index1) %>% .[1] #no. rows index1
   nrows_00 == nrows_01 && nrows_01 == nrows_02
 }
 
-check_rows()
+check_rows() ## should return TRUE
 
-##
+## cache
+index1 %>% write_csv(paste0(path2cache, "pIndex-01-1987to1992.csv"))
 
-index2 %>%
-  group_by(company)
-
-unique(index2$company) %>%
-  sort() %>% View()
 
 
 
