@@ -35,13 +35,13 @@ fuzzy_match1 <- function(df, var) {
   for (i in c(1:n_pairs)) {
     v.agrep[i] <- agrepl(unique_names[i], unique_names[i + 1])
   }
-  agrep_TRUE <- matrix(ncol = 2)
+  agrep_TRUE <- c()
   for (i in which(v.agrep == TRUE)) {
-    agrep_TRUE <- rbind(agrep_TRUE, c(i, unique_names[i]), c(i + 1, unique_names[i + 1]))
+    agrep_TRUE <- rbind(agrep_TRUE, unique_names[i], unique_names[i + 1])
   }
-  table.matches <- agrep_TRUE[-1,1:2]
-  colnames(table.matches) <- c("i", "name")
-  l.fuzzy_match1[[col_name]] <<- as.tibble(table.matches)
+  # table.matches <- agrep_TRUE[-1,1:2]
+  colnames(agrep_TRUE) <- c("index1_name")
+  l.fuzzy_match1[[col_name]] <<- as.tibble(agrep_TRUE)
 }
 
 ## check names company, product
