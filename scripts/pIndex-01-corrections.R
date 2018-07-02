@@ -7,6 +7,7 @@ library(tidyverse)
 library(here)
 # library(validate)
 library(openxlsx)
+library(readxl)
 
 # load functions from pIndex-00-cache.R
 
@@ -62,6 +63,7 @@ write.xlsx(l.fuzzy_match1, file = paste0(path2cache, "pIndex-01-fuzzy_match1-(",
 
 l.unique 
 
+## TODO: turn this into A FUNCTION!
 l.unique$company <- l.unique$company %>%
   mutate(u.company = str_to_lower(company))
 
@@ -70,11 +72,26 @@ l.unique$product <- l.unique$product %>%
 
 make_u_variable <- function(df, var) {
   eval(substitute(df))[[deparse(substitute(var))]] %>%
-    mutate()
+    str_to_upper()
+    # View()
 }
 
 write.xlsx(l.unique, file = paste0(path2cache, "pIndex-01-unique-(", lubridate::today(), ").xlsx"))
 
+wbook <- paste0(path2cache, "pIndex-01-unique-(changed).xlsx")
+lookup2index2 <- wbook %>%
+  excel_sheets() %>%
+  set_names() %>%
+  map(read_excel, path = wbook)
+
+index2 <- index1 %>% 
+  left_join(lookup2index2$company, by = "company") %>% 
+  left_join(lookup2index2$product, by = "product") %>%
+  select(c(rowid, pIndex, company, uc.company, product, uc.product, price_year, price, speed_ppm, review)) %>%
+  mutate(uc.company = str_to_upper(uc.company),
+         uc.product = str_to_upper(uc.product))
+
+index2 %>% write_csv(paste0(path2cache, "pIndex-02-1987to1992.csv"))
 
 ## TODO: check product name matches with same price year (1987), but different prices
 # use unique_product && year == 1987 to subset products, then price[i] == price[i + 1] for i:length[subset -1]
