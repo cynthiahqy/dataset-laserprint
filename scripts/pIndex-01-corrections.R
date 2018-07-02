@@ -5,7 +5,8 @@
 
 library(tidyverse)
 library(here)
-library(validate)
+# library(validate)
+library(openxlsx)
 
 # load functions from pIndex-00-cache.R
 
@@ -25,6 +26,7 @@ index1 <- read_csv(paste0(path2cache, "pIndex-01-1987to1992.csv"))
 ## initialise
 
 l.fuzzy_match1 <- list()
+l.unique <- list()
 
 fuzzy_match1 <- function(df, var) {
   col_name <- deparse(substitute(var))
@@ -40,8 +42,12 @@ fuzzy_match1 <- function(df, var) {
     agrep_TRUE <- rbind(agrep_TRUE, unique_names[i], unique_names[i + 1])
   }
   # table.matches <- agrep_TRUE[-1,1:2]
-  colnames(agrep_TRUE) <- c("index1_name")
+  str(agrep_TRUE)
+  colnames(agrep_TRUE) <- c(paste0(col_name, "-index1"))
+  unique_names <- as.matrix(unique_names)
+  colnames(unique_names) <- c(col_name)
   l.fuzzy_match1[[col_name]] <<- as.tibble(agrep_TRUE)
+  l.unique[[col_name]] <<- as.tibble(unique_names)
 }
 
 ## check names company, product
@@ -50,10 +56,24 @@ fuzzy_match1(index1, company)
 fuzzy_match1(index1, product)
 l.fuzzy_match1
 
-write.xlsx(l.fuzzy_match1, file = paste0(path2cache, "pIndex-01-fuzzy_match1.xlsx"))
+write.xlsx(l.fuzzy_match1, file = paste0(path2cache, "pIndex-01-fuzzy_match1-(", lubridate::today(), ").xlsx"))
 
 ## TODO: corrections for unique company typos
 
+l.unique 
+
+l.unique$company <- l.unique$company %>%
+  mutate(u.company = str_to_lower(company))
+
+l.unique$product <- l.unique$product %>%
+  mutate(u.product = str_to_lower(product)) 
+
+make_u_variable <- function(df, var) {
+  eval(substitute(df))[[deparse(substitute(var))]] %>%
+    mutate()
+}
+
+write.xlsx(l.unique, file = paste0(path2cache, "pIndex-01-unique-(", lubridate::today(), ").xlsx"))
 
 
 ## TODO: check product name matches with same price year (1987), but different prices
