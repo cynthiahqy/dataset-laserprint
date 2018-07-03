@@ -13,11 +13,6 @@ library(readxl)
 
 path2cache <- here("spreadsheets/cache/pIndex/")
 
-write_csv_no <- function(.data, sheet, no) {
-  namebase <- "pIndex"
-  write_csv(.data, paste0(path2cache, namebase, "-", no, "-", sheet, ".csv"))
-}
-
 # read dataframe
 
 index1 <- read_csv(paste0(path2cache, "pIndex-01-1987to1992.csv"))
@@ -51,14 +46,14 @@ fuzzy_match1 <- function(df, var, colno) {
   }
   agrep_TRUE <- c()
   for (i in which(v.agrep == TRUE)) {
-    agrep_TRUE <- rbind(agrep_TRUE, c(i, unique_names[i], i + 1, unique_names[i + 1]))
+    agrep_TRUE <- rbind(agrep_TRUE, c(i, str_to_lower(unique_names[i]), i + 1, str_to_lower(unique_names[i + 1])))
     # print(i:(i + 1))
     # print(unique_names[i:(i + 1)])
   }
   # l.agrep[[col_name]] <<- v.agrep
   table.matches <- agrep_TRUE[-1,1:4]
   colnames(table.matches) <- c("index1", "name1", "index2", "name2")
-  l.fuzzy_match1[[col_name]] <<- as.tibble(table.matches)
+  l.fuzzy_match1[[col_name]] <<- as.tibble(table.matches) 
 }
 
 ## List unique company, product names
@@ -89,11 +84,15 @@ lookup2index2 <- wbook %>%
 index2 <- index1 %>% 
   left_join(lookup2index2$company, by = "company") %>% 
   left_join(lookup2index2$product, by = "product") %>%
-  select(c(rowid, pIndex, company, uc.company, product, uc.product, price_year, price, speed_ppm, review)) %>%
+  select(c(rowid, pIndex_year, uc.company, uc.product, price_year, price, speed_ppm, review, review_year)) %>%
   mutate(uc.company = str_to_upper(uc.company),
-         uc.product = str_to_upper(uc.product))
+         uc.product = str_to_upper(uc.product)) %>%
+  rename(company = uc.company,
+         product = uc.product)
 
 index2 %>% write_csv(paste0(path2cache, "pIndex-02-1987to1992.csv"))
+
+
 
 ## TODO: check product name matches with same price year (1987), but different prices
 # use unique_product && year == 1987 to subset products, then price[i] == price[i + 1] for i:length[subset -1]
