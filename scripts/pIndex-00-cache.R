@@ -130,11 +130,15 @@ set_names(l.index1[3:6], c(1989:1992))
 # COMBINE, CHECK and CACHE tidy l.index1 ----
 
 ## combine all years into single tibble
-index1 <- bind_rows(l.index1) %>%
-  mutate(pIndex = c.index_year) %>%
+index1_cache_all_vars <- bind_rows(l.index1) %>% rowid_to_column()
+
+index1_cache_all_vars %>% write_csv(paste0(path2cache, "pIndex-00-1987to1992-allvars.csv"))
+
+index1 <- index1_cache_all_vars %>%
   unite(review, z.vol, z.no, sep = "-") %>%
-  select(c(pIndex, company, product, price_year, price, speed_ppm, review)) %>%
-  rowid_to_column()
+  select(c(rowid, c.index_year, company, product, price_year, price, speed_ppm, review, c.review_year)) %>%
+  rename(pIndex_year = c.index_year,
+         review_year = c.review_year)
 
 ## check l.index0 and l.index1 no. rows match
 check_rows <- function() {
