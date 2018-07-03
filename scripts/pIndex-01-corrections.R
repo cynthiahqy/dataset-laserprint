@@ -26,13 +26,24 @@ index1 <- read_csv(paste0(path2cache, "pIndex-01-1987to1992.csv"))
 
 ## initialise
 
-l.fuzzy_match1 <- list()
 l.unique <- list()
 
-fuzzy_match1 <- function(df, var) {
+list_unique <- function(df, var) {
   col_name <- deparse(substitute(var))
   col_vals <- eval(substitute(df))[[col_name]]
-  unique_names <- col_vals %>% unique() %>% sort()
+  unique_names <- col_vals %>% unique() %>% sort() %>% as.tibble() 
+  unique_names[[2]] <- str_to_upper(unique_names[[1]])
+  unique_names[[3]] <- str_to_lower(unique_names[[1]])
+  unique_names[[4]] <- unique_names[[3]]
+  colnames(unique_names) <- c(col_name, paste0("u.", col_name), paste0("low.", col_name), paste0("uc.", col_name))
+  l.unique[[col_name]] <<- unique_names
+}
+
+l.fuzzy_match1 <- list()
+
+fuzzy_match1 <- function(df, var, colno) {
+  col_name <- deparse(substitute(var))
+  unique_names <- eval(substitute(df))[[col_name]][[colno]]
   n_pairs <- (length(unique_names) - 1)
   v.agrep <- c()
   for (i in c(1:n_pairs)) {
@@ -40,45 +51,36 @@ fuzzy_match1 <- function(df, var) {
   }
   agrep_TRUE <- c()
   for (i in which(v.agrep == TRUE)) {
-    agrep_TRUE <- rbind(agrep_TRUE, unique_names[i], unique_names[i + 1])
+    agrep_TRUE <- rbind(agrep_TRUE, c(i, unique_names[i], i + 1, unique_names[i + 1]))
+    # print(i:(i + 1))
+    # print(unique_names[i:(i + 1)])
   }
-  # table.matches <- agrep_TRUE[-1,1:2]
-  str(agrep_TRUE)
-  colnames(agrep_TRUE) <- c(paste0(col_name, "-index1"))
-  unique_names <- as.matrix(unique_names)
-  colnames(unique_names) <- c(col_name)
-  l.fuzzy_match1[[col_name]] <<- as.tibble(agrep_TRUE)
-  l.unique[[col_name]] <<- as.tibble(unique_names)
+  # l.agrep[[col_name]] <<- v.agrep
+  table.matches <- agrep_TRUE[-1,1:4]
+  colnames(table.matches) <- c("index1", "name1", "index2", "name2")
+  l.fuzzy_match1[[col_name]] <<- as.tibble(table.matches)
 }
 
-## check names company, product
+## List unique company, product names
 
-fuzzy_match1(index1, company)
-fuzzy_match1(index1, product)
+list_unique(index1, company)
+list_unique(index1, product)
+l.unique
+
+write.xlsx(l.unique, file = paste0(path2cache, "pIndex-01-hand_corrections.xlsx"))
+
+## Run fuzzy match
+
+fuzzy_match1(l.unique, company, 1)
+fuzzy_match1(l.unique, product, 1)
 l.fuzzy_match1
 
-write.xlsx(l.fuzzy_match1, file = paste0(path2cache, "pIndex-01-fuzzy_match1-(", lubridate::today(), ").xlsx"))
+write.xlsx(l.fuzzy_match1, file = paste0(path2cache, "pIndex-01-fuzzy_match1.xlsx"))
 
-## TODO: corrections for unique company typos
 
-l.unique 
+### READ IN CORRECTIONS ----
 
-## TODO: turn this into A FUNCTION!
-l.unique$company <- l.unique$company %>%
-  mutate(u.company = str_to_lower(company))
-
-l.unique$product <- l.unique$product %>%
-  mutate(u.product = str_to_lower(product)) 
-
-make_u_variable <- function(df, var) {
-  eval(substitute(df))[[deparse(substitute(var))]] %>%
-    str_to_upper()
-    # View()
-}
-
-write.xlsx(l.unique, file = paste0(path2cache, "pIndex-01-unique-(", lubridate::today(), ").xlsx"))
-
-wbook <- paste0(path2cache, "pIndex-01-unique-(changed).xlsx")
+wbook <- paste0(path2cache, "pIndex-01-hand_corrections.xlsx")
 lookup2index2 <- wbook %>%
   excel_sheets() %>%
   set_names() %>%
