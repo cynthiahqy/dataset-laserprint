@@ -132,7 +132,7 @@ set_names(l.index1[3:6], c(1989:1992))
 ## combine all years into single tibble
 index1_cache_all_vars <- bind_rows(l.index1) %>% rowid_to_column()
 
-index1_cache_all_vars %>% write_csv(paste0(path2cache, "pIndex-00-1987to1992-allvars.csv"))
+index1_cache_all_vars %>% write_csv(paste0(path2cache, "pIndex-00-allvars.csv"))
 
 index1 <- index1_cache_all_vars %>%
   unite(review, z.vol, z.no, sep = "-") %>%

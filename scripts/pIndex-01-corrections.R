@@ -62,7 +62,9 @@ list_unique(index1, company)
 list_unique(index1, product)
 l.unique
 
-write.xlsx(l.unique, file = paste0(path2cache, "pIndex-01-hand_corrections.xlsx"))
+path2corrections <- paste0(path2cache, "corrections-pIndex01-unique.xlsx")
+
+write.xlsx(l.unique, file = path2corrections)
 
 ## Run fuzzy match
 
@@ -70,25 +72,28 @@ fuzzy_match1(l.unique, company, 1)
 fuzzy_match1(l.unique, product, 1)
 l.fuzzy_match1
 
-write.xlsx(l.fuzzy_match1, file = paste0(path2cache, "pIndex-01-fuzzy_match1.xlsx"))
+write.xlsx(l.fuzzy_match1, file = paste0(path2cache, "reference-pIndex01-fuzzy_match1.xlsx"))
 
 
 ### READ IN CORRECTIONS ----
 
-wbook <- paste0(path2cache, "pIndex-01-hand_corrections.xlsx")
+wbook <- paste0(path2cache, "corrections-pIndex01-unique.xlsx")
 lookup2index2 <- wbook %>%
   excel_sheets() %>%
   set_names() %>%
   map(read_excel, path = wbook)
 
-index2 <- index1 %>% 
+index2_cache_allvars <- index1 %>% 
   left_join(lookup2index2$company, by = "company") %>% 
-  left_join(lookup2index2$product, by = "product") %>%
-  select(c(rowid, pIndex_year, uc.company, uc.product, price_year, price, speed_ppm, review, review_year)) %>%
-  mutate(uc.company = str_to_upper(uc.company),
-         uc.product = str_to_upper(uc.product)) %>%
-  rename(company = uc.company,
-         product = uc.product)
+  left_join(lookup2index2$product, by = "product") 
+
+index2_cache_allvars %>% write_csv(paste0(path2cache, "pIndex-01-allvars.csv"))
+
+index2 <- index2_cache_allvars %>%
+  mutate(company = str_to_upper(uc.company),
+         product = str_to_upper(uc.product),
+         product_brand = str_to_upper(brand)) %>%
+  select(-one_of(c("u.company", "correction 1", "uc.company", "low.company", "u.product", "low.product", "uc.product", "brand note", "brand"))) 
 
 index2 %>% write_csv(paste0(path2cache, "pIndex-02-1987to1992.csv"))
 
