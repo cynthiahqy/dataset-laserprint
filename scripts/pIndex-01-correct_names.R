@@ -23,6 +23,7 @@ index1 <- read_csv(paste0(path2cache, "pIndex-01-1987to1992.csv"))
 
 l.unique <- list()
 
+# u. upper case, low. lower case, uc. unique corrections
 list_unique <- function(df, var) {
   col_name <- deparse(substitute(var))
   col_vals <- eval(substitute(df))[[col_name]]

@@ -30,16 +30,35 @@ df_x1 <- read_csv(path2x1,
            source_vol = col_integer(),
            source_no = col_integer(),
            product = col_character(),
-           product_brand = col_factor(levels = NULL),
+           product_brand = col_character(),
            company = col_character(),
            price_list = col_double(),
            price_street = col_double(),
-           engine_brand = col_factor(levels = NULL),
-           product_type = col_factor(levels = NULL)
+           engine_brand = col_character(),
+           product_type = col_character()
            )
-         )
+         ) %>%
+  mutate(product_brand = str_to_upper(product_brand),
+         product_type = str_to_lower(product_type),
+         engine_brand = str_to_upper(engine_brand))
+
+# check for typos
+
+list_unique <- function(df, var) {
+  col_name <- deparse(substitute(var))
+  col_vals <- eval(substitute(df))[[col_name]]
+  unique_names <- col_vals %>% unique() %>% sort() %>% as.tibble() 
+  unique_names[[2]] <- unique_names[[1]]
+  colnames(unique_names) <- c(col_name, paste0(col_name), paste0("cor.", col_name))
+  l.unique[[col_name]] <<- unique_names
+}
+
+# unique product_types
+uni.product_type <- df_x1[["product_type"]] %>% unique() %>% sort()
+uni.product_brand <- df_x1[["product_brand"]] %>% unique() %>% sort()
 
 
 
+list_unique(df_x1, product_brand) %>% View()
 
   
