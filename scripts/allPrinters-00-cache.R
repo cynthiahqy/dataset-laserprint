@@ -42,6 +42,9 @@ df_x1 <- read_csv(path2x1,
          product_type = str_to_lower(product_type),
          engine_brand = str_to_upper(engine_brand))
 
+
+
+## DATA CLEANING
 # check for typos
 
 list_unique <- function(df, var) {
@@ -56,9 +59,61 @@ list_unique <- function(df, var) {
 # unique product_types
 uni.product_type <- df_x1[["product_type"]] %>% unique() %>% sort()
 uni.product_brand <- df_x1[["product_brand"]] %>% unique() %>% sort()
-
-
-
 list_unique(df_x1, product_brand) %>% View()
 
+## product_brand --> input N/A, correct duplications
+# generate binary var: debut_brand = 1 if source_vol = min(source_vol given product_brand)
+# generate binary var: fade_brand
+df_x1 %>%
+  ggplot(mapping = aes(x = source_vol, y = product_brand)) +
+  geom_point() +
+  xlim(3, 17)
+
+df_x1 %>%
+  ggplot(mapping = aes(x = source_vol, y = company)) +
+  geom_point() +
+  xlim(3, 17)
+
+
+## EXPERIMENTAL DATA VIZ
+
+all_printers <- df_x1
+# group by engine_brand
+
+by_engine <- all_printers %>% 
+  filter(engine_brand != "?") %>%
+  group_by(engine_brand) 
+
+# plots number of reviewed prints with engines from brand, and which issues the engine_brand was present
+add_count(by_engine) %>%
+  # filter(n > 10) %>%
+  ggplot(data = ., mapping = aes(y = n, x = source_vol, color = engine_brand, shape = n > 5)) +
+  geom_point()
+
+
+# price scatterplot over time
+ggplot(data = all_printers) +
+  geom_point(mapping = aes(x = source_vol, y = price_list, position = "jitter"))
+
+df_x1 %>%
+  filter(price_list < 10000) %>%
+  ggplot() +
+  geom_smooth(mapping = aes(x = source_vol, y = price_list))
+
+# max, min, median of price over time [ ISSUE WITH INCLUSION OF BUSINESS MACHINES ]
+ggplot(data = df_x1) + 
+  stat_summary(
+    mapping = aes(x = source_vol, y = price_list),
+    fun.ymin = min,
+    fun.ymax = max,
+    fun.y = median
+  )
+
+# number of printers reviewed
+ggplot(data = df_x1) + 
+  stat_count(mapping = aes(x = source_vol)) 
+
+
+ggplot(data = df_x1) +
+  stat_count(mapping = aes(x = engine_brand))
   
