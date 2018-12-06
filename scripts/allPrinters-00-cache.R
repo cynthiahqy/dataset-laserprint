@@ -4,9 +4,12 @@
 library(tidyverse)
 library(readxl)
 library(here)
+library(openxlsx)
+library(stringr)
 
 wbook <- here("spreadsheets/handtype_writtenReview.xlsx")
 path2cache <- here("spreadsheets/cache/allPrinters/")
+path2correct <- here("spreadsheets/cache/corrections/")
 
 # split x1, remainder x1r
 x1 <- c("source_vol", "source_no", "product", "product_brand", "company", "price_list", "price_street", "engine_brand", "product_type")
@@ -44,7 +47,46 @@ df_x1 <- read_csv(path2x1,
 
 
 
-## DATA CLEANING
+## DATA CLEANING 
+
+all_printers <- df_x1
+
+# create parent_co
+
+uni_company <- 
+  unique(all_printers$company) %>%
+  sort() %>%
+  as.tibble()
+
+colnames(uni_company) <- "company"
+
+rm_comptype <- function(x) {
+  str_remove(x, " (Inc\\.|Corp\\.|Co\\.)") %>%
+  str_remove(., ",$") 
+}
+
+uni_company <- mutate(uni_company, 
+                      trun_company = str_remove(company, " (Inc\\.|Corp\\.|Co\\.|,$)"),
+                      parent_co = str_to_upper(str_remove(company, " .+"))) 
+
+uni_company %>% write_csv(., paste0(path2correct, "company_names.csv"))
+
+# read in corrections
+
+cor_company <- read_csv(paste0(path2correct, "company_names-v01.csv"))
+
+
+
+
+# group by product_brand
+group_by(all_printers, company, product_brand) %>%
+  summarise(n_product = n()) %>%
+  summarise(n_brands = n()) %>% View()
+
+group_by(all_printers, product_brand) %>%
+
+all_printers %>% count(product_brand)
+
 # check for typos
 
 list_unique <- function(df, var) {
