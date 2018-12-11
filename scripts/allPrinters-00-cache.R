@@ -11,14 +11,17 @@ wbook <- here("spreadsheets/handtype_writtenReview.xlsx")
 path2cache <- here("spreadsheets/cache/allPrinters/")
 path2correct <- here("spreadsheets/cache/corrections/")
 
+## READ & CACHE handtype-writtenreviews -----
 # split x1, remainder x1r
 x1 <- c("source_vol", "source_no", "product", "product_brand", "company", "price_list", "price_street", "engine_brand", "product_type")
-path2x1 <- paste0(path2cache, "allPrinters-x1.csv")
 
 # cache to csv variables in x1
 read_excel(wbook, sheet = 3) %>%
   .[c("row_id", x1)] %>%
-  write_csv(., path2x1)
+  mutate(product_brand = str_to_upper(product_brand),
+         product_type = str_to_lower(product_type),
+         engine_brand = str_to_upper(engine_brand)) %>%
+  write_csv(., paste0(path2cache, "allPrinters-x1.csv"))
 
 # cache remaining variables
 read_excel(wbook, sheet = 3) %>%
@@ -27,56 +30,86 @@ read_excel(wbook, sheet = 3) %>%
 
 # IMPORT x1 tibble for CLEANING
 
-df_x1 <- read_csv(path2x1, 
-         col_types = cols(
-           row_id = col_character(),
-           source_vol = col_integer(),
-           source_no = col_integer(),
-           product = col_character(),
-           product_brand = col_character(),
-           company = col_character(),
-           price_list = col_double(),
-           price_street = col_double(),
-           engine_brand = col_character(),
-           product_type = col_character()
-           )
-         ) %>%
-  mutate(product_brand = str_to_upper(product_brand),
-         product_type = str_to_lower(product_type),
-         engine_brand = str_to_upper(engine_brand))
+# df_x1 <- read_csv(paste0(path2cache, "allPrinters-x1.csv"), 
+#          col_types = cols(
+#            row_id = col_character(),
+#            source_vol = col_integer(),
+#            source_no = col_integer(),
+#            product = col_character(),
+#            product_brand = col_character(),
+#            company = col_character(),
+#            price_list = col_double(),
+#            price_street = col_double(),
+#            engine_brand = col_character(),
+#            product_type = col_character()
+#            )
+#          )
 
 
+# DATA CLEANING ----
+## ADD parent_co, CORRECT product_brand ----
+# import latest version of allprinters_x1
 
-## DATA CLEANING 
+all_printers <- read_csv(paste0(path2cache, "allPrinters-x1.csv"))
 
-all_printers <- df_x1
+# create correction table for parent_co
 
-# create parent_co
-
-uni_company <- 
+unique_company <- 
   unique(all_printers$company) %>%
   sort() %>%
-  as.tibble()
+  as.tibble() %>%
 
-colnames(uni_company) <- "company"
+colnames(unique_company) <- "company"
 
-rm_comptype <- function(x) {
-  str_remove(x, " (Inc\\.|Corp\\.|Co\\.)") %>%
-  str_remove(., ",$") 
-}
+unique_company <-   mutate(unique_company,
+  trun_company = str_remove(company, " (Inc\\.|Corp\\.|Co\\.|,$)"),
+  parent_co = str_to_upper(str_remove(company, " .+"))) 
 
-uni_company <- mutate(uni_company, 
-                      trun_company = str_remove(company, " (Inc\\.|Corp\\.|Co\\.|,$)"),
-                      parent_co = str_to_upper(str_remove(company, " .+"))) 
+# rm_comptype <- function(x) {
+#   str_remove(x, " (Inc\\.|Corp\\.|Co\\.)") %>%
+#   str_remove(., ",$") 
+# }
 
-uni_company %>% write_csv(., paste0(path2correct, "company_names.csv"))
+unique_company %>% write_csv(., paste0(path2correct, "company_names.csv"))
 
-# read in corrections
+# create correction table for brands
 
-cor_company <- read_csv(paste0(path2correct, "company_names-v01.csv"))
+unique_brand <- 
+  unique(all_printers$product_brand) %>%
+  sort() %>%
+  as.tibble() 
+
+colnames(unique_brand) <- "x1_brand"
+
+unique_brand %>% 
+  write_csv(., paste0(path2correct, "brand_names.csv"))
+
+# read in corrections for brands and companies, merge with all_printers and cache
+
+correct_company <- 
+  read_csv(paste0(path2correct, "company_names-v01.csv")) %>%
+  select(c("company", "parent_co")) %>%
+  left_join(all_printers, ., by = "company")
 
 
+correct_co_brand <- 
+  read_csv(paste0(path2correct, "brand_names-v01.csv")) %>%
+  select(c("x1_brand", "correct_brand")) %>%
+  left_join(correct_company, ., by = c("product_brand" = "x1_brand")) %>% 
+  mutate(product_brand = correct_brand) %>%
+  select(-correct_brand)
+  # filter(product_brand == "ABATON")
 
+write_csv(correct_co_brand, paste0(path2cache, "allPrinters-x1-correct01.csv"))
+
+## FILTER irrelevant product_type ----
+
+# import latest version of allprinters_x1
+
+all_printers <- read_csv(paste0(path2cache, "allPrinters-x1-correct01.csv"))
+
+
+## GROUPING EXPLORATION ----
 
 # group by product_brand
 group_by(all_printers, company, product_brand) %>%
@@ -117,7 +150,7 @@ df_x1 %>%
   xlim(3, 17)
 
 
-## EXPERIMENTAL DATA VIZ
+## EXPERIMENTAL DATA VIZ ----
 
 all_printers <- df_x1
 # group by engine_brand
