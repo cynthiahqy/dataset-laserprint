@@ -7,11 +7,12 @@ library(here)
 library(openxlsx)
 library(stringr)
 
-wbook <- here("spreadsheets/handtype_writtenReview.xlsx")
 path2cache <- here("spreadsheets/cache/allPrinters/")
 path2correct <- here("spreadsheets/cache/corrections/")
 
 ## READ & CACHE handtype-writtenreviews -----
+# load handtype
+wbook <- here("spreadsheets/handtype_writtenReview.xlsx")
 # split x1, remainder x1r
 x1 <- c("source_vol", "source_no", "product", "product_brand", "company", "price_list", "price_street", "engine_brand", "product_type")
 
@@ -47,7 +48,7 @@ read_excel(wbook, sheet = 3) %>%
 
 
 # DATA CLEANING ----
-## ADD parent_co, CORRECT product_brand ----
+## correct01: ADD parent_co, CORRECT product_brand ----
 # import latest version of allprinters_x1
 
 all_printers <- read_csv(paste0(path2cache, "allPrinters-x1.csv"))
@@ -102,12 +103,70 @@ correct_co_brand <-
 
 write_csv(correct_co_brand, paste0(path2cache, "allPrinters-x1-correct01.csv"))
 
-## FILTER irrelevant product_type ----
+## correct02: CORRECT engine_brand ----
 
 # import latest version of allprinters_x1
 
 all_printers <- read_csv(paste0(path2cache, "allPrinters-x1-correct01.csv"))
 
+# create correction table for engine_brand (manufacturer)
+unique_engine <- 
+  unique(all_printers$engine_brand) %>%
+  sort() %>%
+  as.tibble()
+
+colnames(unique_engine) <- "old.engine_brand"
+
+unique_engine <-
+  mutate(unique_engine, correct.engine_brand = old.engine_brand)
+  
+write_csv(unique_engine, paste0(path2correct, "engine_brands.csv"))
+
+# read and merge corrections for engine_brand
+
+correct_engine <-
+  read_csv(paste0(path2correct, "engine_brands-v01.csv")) %>%
+  select(c("old.engine_brand", "correct.engine_brand")) %>%
+  left_join(all_printers, ., by = c("engine_brand" = "old.engine_brand")) %>%
+  mutate(engine_brand = correct.engine_brand,
+         correct.engine_brand = NULL)
+
+write_csv(correct_engine, paste0(path2cache, "allPrinters-x1-correct02.csv"))
+
+## correct03: merge price_list and price_street, reorder variables ----
+
+all_printers <- read_csv(paste0(path2cache, "allPrinters-x1-correct02.csv"))
+
+all_printers[is.na(all_printers$price_street), ]["price_street"] <- 0
+
+# create price_max = list price, or if no list price use street price
+add_price <- 
+  mutate(all_printers, 
+       price_max = pmax(price_list, price_street)) %>%
+  select("row_id", starts_with("source"), "product", "product_brand", "parent_co", "engine_brand", "product_type", "price_max", starts_with("price"))
+  
+write_csv(add_price, paste0(path2cache, "allPrinters-x1-correct03.csv"))
+
+## correct04: correct product_name ----
+
+all_printers <- read_csv(paste0(path2cache, "allPrinters-x1-correct03.csv"))
+
+unique_product <-
+  unique(all_printers$product) %>%
+  sort() %>%
+  as.tibble()
+
+colnames(unique_product) <- "old.product"
+
+unique_product <-
+  mutate(unique_product,
+       new.product_name = str_to_upper(old.product))
+
+write_csv(unique_product, paste0(path2correct, "product_names.csv"))
+
+
+all_printers %>%
+  arrange(product)
 
 ## GROUPING EXPLORATION ----
 
