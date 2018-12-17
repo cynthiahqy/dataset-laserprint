@@ -68,3 +68,34 @@ plot.parent_status <-
 
 print(plot.parent_status)
 
+#
+
+# PLOTS engine_brand
+
+## engine_entryexit
+by_engine <- all_printers %>%
+  group_by(engine_brand) %>%
+  drop_na(source_vol) %>%
+  filter(!engine_brand %in% c("UNKN", "N/A"))
+
+df.engine_entryexit <- by_engine %>%
+  summarise(min_vol = min(source_vol),
+            max_vol = max(source_vol),
+            mkt_vols = max_vol - min_vol + 1) %>%
+  mutate(engine_brand = fct_reorder(engine_brand, desc(min_vol))) %>%
+  rename(`1` = min_vol,
+         `4` = max_vol) %>%
+  gather(`1`, `4`, key = "status", value = "source_vol") %>%
+  mutate(status = as.numeric(status))
+
+plot.engine_entryexit <- df.engine_entryexit %>%
+  ggplot(mapping = aes(y = fct_reorder(engine_brand, mkt_vols), x = source_vol + 1981)) +
+  geom_point(aes(shape = status)) + scale_shape_identity() + 
+  geom_line(aes(group = engine_brand, colour = mkt_vols)) +
+  labs(title = "entry/exit of engine_brand by longevity, then entry year", 
+       subtitle = "longevity is based on first & last appearance, entry year is first appearance",
+       x = "year in PC Magazine",
+       y = "Engine Manufacturer")
+
+
+
