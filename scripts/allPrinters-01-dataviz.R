@@ -17,7 +17,10 @@ all_printers <- read_csv(paste0(path2cache, "allPrinters-x1-correct04.csv"))
 
 df.by_parent <- all_printers %>%
   group_by(parent_co) %>%
-  drop_na(source_vol)
+  drop_na(source_vol) %>%
+  filter(product_type %in% c("laser", "led", "lcd", "lcs", "laser-copier"))
+
+unique(all_printers$product_type)
 
 ## generate entry (status == 1), exit (status == 4) indicators, longevity value (mkt_vols)
 
@@ -31,6 +34,21 @@ df.parent_entryexit <- df.by_parent %>%
   gather(`1`, `4`, key = "status", value = "source_vol") %>%
   mutate(status = as.numeric(status))
 
+## plot entry/exit of parent_co by longevity, then entry year
+
+plot.entryexit <- df.parent_entryexit %>%
+  ggplot(mapping = aes(y = fct_reorder(parent_co, mkt_vols), x = source_vol + 1981)) +
+  geom_point(aes(shape = status)) + scale_shape_identity() + 
+  geom_line(aes(group = parent_co)) +
+  labs(title = "entry/exit of parent_co by longevity, then entry year", 
+       subtitle = "longevity is based on first & last appearance, entry year is first appearance",
+       x = "year in PC Magazine",
+       y = "Company Name")
+
+print(plot.entryexit)
+
+## merge status variable into all_printers, fill in review (status == 3), fill longevity value
+
 df.parent_status <-
   left_join(all_printers, df.parent_entryexit, by = c("parent_co", "source_vol")) %>%
   select(c(parent_co, status, mkt_vols, source_vol)) %>%
@@ -38,9 +56,14 @@ df.parent_status <-
   fill(mkt_vols)
 
 plot.parent_status <-
-  ggplot(df.parent_status, mapping = aes(y = fct_reorder(parent_co, mkt_vols), x = source_vol)) +
+  df.parent_status %>%
+  ggplot(mapping = aes(y = fct_reorder(parent_co, mkt_vols), x = source_vol + 1981)) +
   geom_point(aes(shape = status)) + scale_shape_identity() + 
   geom_line(aes(group = parent_co)) 
+
+print(plot.parent_status)
+
+ 
 
 ## by entry year
 
