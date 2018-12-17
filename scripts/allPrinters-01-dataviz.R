@@ -30,7 +30,8 @@ df.by_parent <- all_printers %>%
 df.parent_entryexit <- df.by_parent %>%
   summarise(min_vol = min(source_vol),
             max_vol = max(source_vol),
-            mkt_vols = max_vol - min_vol + 1) %>%
+            mkt_vols = max_vol - min_vol + 1,
+            no_of_brands = n_distinct(product_brand)) %>%
   mutate(parent_co = fct_reorder(parent_co, desc(min_vol))) %>%
   rename(`1` = min_vol,
          `4` = max_vol) %>%
@@ -40,11 +41,11 @@ df.parent_entryexit <- df.by_parent %>%
 ### plot entry/exit of parent_co by longevity, then entry year
 
 plot.parent_entryexit <- df.parent_entryexit %>%
-  ggplot(mapping = aes(y = fct_reorder(parent_co, mkt_vols), x = source_vol + 1981)) +
+  ggplot(mapping = aes(y = fct_reorder(parent_co, mkt_vols), x = factor(source_vol + 1981))) +
   geom_point(aes(shape = status)) + scale_shape_identity() + 
   geom_line(aes(group = parent_co)) +
-  labs(title = "entry/exit of parent_co by longevity, then entry year", 
-       subtitle = "longevity is based on first & last appearance, entry year is first appearance",
+  labs(title = "Companies in Market", 
+       subtitle = "arranged by longevity (based on first & last appearance), then entry year (first appearance)",
        x = "year in PC Magazine",
        y = "Company Name")
 
@@ -82,7 +83,7 @@ df.engine_entryexit <- by_engine %>%
   summarise(min_vol = min(source_vol),
             max_vol = max(source_vol),
             mkt_vols = max_vol - min_vol + 1,
-            brands_per_engine = n_distinct(product_brand)) %>%
+            no_of_brands = n_distinct(product_brand)) %>%
   mutate(engine_brand = fct_reorder(engine_brand, desc(min_vol))) %>%
   rename(`1` = min_vol,
          `4` = max_vol) %>%
@@ -109,12 +110,12 @@ plot.engine_entryexit +
 plot.engine_entryexit_brands <- df.engine_entryexit %>%
   ggplot(mapping = aes(y = fct_reorder(engine_brand, mkt_vols), x = factor(source_vol + 81))) +
   geom_point(aes(shape = status)) + scale_shape_identity() + 
-  geom_line(aes(group = engine_brand, colour = desc(brands_per_engine))) +
+  geom_line(aes(group = engine_brand, colour = desc(no_of_brands))) +
   labs(title = "Number of Printer Brands Supplied to by Engine Manufacturers", 
        subtitle = "arranged by longevity (based on first & last appearance), then entry year (first appearance)",
        x = "Year in PC Magazine",
        y = "Engine Manufacturer",
-       colour = "Total Number of Brands")
+       colour = "Brands")
 
 
 
