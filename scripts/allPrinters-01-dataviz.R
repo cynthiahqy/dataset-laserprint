@@ -15,28 +15,46 @@ all_printers <- read_csv(paste0(path2cache, "allPrinters-x1-correct04.csv"))
 
 ## group data set
 
-df.by_parent_co <- all_printers %>%
+df.by_parent <- all_printers %>%
   group_by(parent_co) %>%
   drop_na(source_vol)
 
-df.by_parent_co_yearspan <- df.by_parent_co %>%
-  summarise(min_year = min(source_vol) + 1981,
-            max_year = max(source_vol) + 1981,
-            mkt_years = max_year - min_year + 1) 
+## generate entry (status == 1), exit (status == 4) indicators, longevity value (mkt_vols)
 
-# df.all_printers_yearspan <-
-#   left_join(all_printers, df.parent_co_by_entry, by = c("parent_co", "source_vol"))
+df.parent_entryexit <- df.by_parent %>%
+  summarise(min_vol = min(source_vol),
+            max_vol = max(source_vol),
+            mkt_vols = max_vol - min_vol + 1) %>%
+  mutate(parent_co = fct_reorder(parent_co, desc(min_vol))) %>%
+  rename(`1` = min_vol,
+         `4` = max_vol) %>%
+  gather(`1`, `4`, key = "status", value = "source_vol") %>%
+  mutate(status = as.numeric(status))
+
+df.parent_status <-
+  left_join(all_printers, df.parent_entryexit, by = c("parent_co", "source_vol")) %>%
+  select(c(parent_co, status, mkt_vols, source_vol)) %>%
+  replace_na(list(status = 3)) %>%
+  fill(mkt_vols)
+
+plot.parent_status <-
+  ggplot(df.parent_status, mapping = aes(y = fct_reorder(parent_co, mkt_vols), x = source_vol)) +
+  geom_point(aes(shape = status)) + scale_shape_identity() + 
+  geom_line(aes(group = parent_co)) 
 
 ## by entry year
 
-df.parent_co_by_entry <- 
-  df.by_parent_co_yearspan %>%
+df.parent_by_entry <- 
+  df.parent_yearspan %>%
     mutate(parent_co = fct_reorder(parent_co, desc(min_year))) %>%
     rename(`1` = min_year,
          `4` = max_year) %>%
     gather(`1`, `4`, key = "entry", value = "date") %>%
     mutate(entry = as.numeric(entry),
            source_vol = date - 1981)
+
+order.parent_by_entry <-
+  levels(df.parent_co_by_entry$parent_co)
 
 plot.parent_co_by_entry <-
   df.parent_co_by_entry %>%
