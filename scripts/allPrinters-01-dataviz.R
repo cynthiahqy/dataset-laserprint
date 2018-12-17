@@ -11,31 +11,54 @@ path2cache <- here("spreadsheets/cache/allPrinters/")
 
 all_printers <- read_csv(paste0(path2cache, "allPrinters-x1-correct04.csv"))
 
-by_parent_co <- 
-  group_by(all_printers, parent_co) %>%
-  summarise(min_year = min(source_vol) + 1981,
-            max_year = max(source_vol) + 1981,
-            mkt_years = max_year - min_year + 1)
+# parent_co plots ---- 
 
-by_parent_co %>%
-  
-  
-  # factor_parent_by_minyear <- by_parent_co %>% 
-  #   arrange(min_year) %>%
-  #   select(parent_co) 
-  # 
-  # factor(by_parent_co$parent_co, factor_parent_by_minyear)
-  
-  
-  ggplot() +
-  geom_point(mapping = aes(y = parent_co, x = min_year)) +
-  geom_point(mapping = aes(y = parent_co, x = max_year), colour = 'red')
+## group data set
 
-correct_product %>%
+df.by_parent_co <- all_printers %>%
   group_by(parent_co) %>%
+  drop_na(source_vol)
+
+df.by_parent_co_yearspan <- df.by_parent_co %>%
   summarise(min_year = min(source_vol) + 1981,
             max_year = max(source_vol) + 1981,
-            mkt_years = max_year - min_year + 1)
+            mkt_years = max_year - min_year + 1) 
+
+# df.all_printers_yearspan <-
+#   left_join(all_printers, df.parent_co_by_entry, by = c("parent_co", "source_vol"))
+
+## by entry year
+
+df.parent_co_by_entry <- 
+  df.by_parent_co_yearspan %>%
+    mutate(parent_co = fct_reorder(parent_co, desc(min_year))) %>%
+    rename(`1` = min_year,
+         `4` = max_year) %>%
+    gather(`1`, `4`, key = "entry", value = "date") %>%
+    mutate(entry = as.numeric(entry),
+           source_vol = date - 1981)
+
+plot.parent_co_by_entry <-
+  df.parent_co_by_entry %>%
+  ggplot(mapping = aes(y = parent_co, x = date)) +
+    geom_point(aes(shape = entry)) + scale_shape_identity() + 
+    geom_line(aes(group = parent_co)) 
+
+## by longevity
+plot.parent_co_by_longevity <-
+  df.by_parent_co_yearspan %>%
+    mutate(parent_co = fct_reorder(parent_co, mkt_years)) %>%
+    rename(`1` = min_year,
+           `4` = max_year) %>%
+    gather(`1`, `4`, key = "entry", value = "date") %>%
+    mutate(entry = as.numeric(entry)) %>%
+  ggplot(mapping = aes(y = parent_co, x = date)) +
+    geom_point(aes(shape = entry)) + scale_shape_identity() + 
+    geom_line(aes(group = parent_co)) +
+  labs(title = "Years in Market by Longevity")
+
+print(plot.parent_co_by_entry)
+print(plot.parent_co_by_longevity)
 
 ## GROUPING EXPLORATION ----
 
