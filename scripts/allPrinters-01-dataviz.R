@@ -81,7 +81,8 @@ by_engine <- all_printers %>%
 df.engine_entryexit <- by_engine %>%
   summarise(min_vol = min(source_vol),
             max_vol = max(source_vol),
-            mkt_vols = max_vol - min_vol + 1) %>%
+            mkt_vols = max_vol - min_vol + 1,
+            brands_per_engine = n_distinct(product_brand)) %>%
   mutate(engine_brand = fct_reorder(engine_brand, desc(min_vol))) %>%
   rename(`1` = min_vol,
          `4` = max_vol) %>%
@@ -89,13 +90,33 @@ df.engine_entryexit <- by_engine %>%
   mutate(status = as.numeric(status))
 
 plot.engine_entryexit <- df.engine_entryexit %>%
-  ggplot(mapping = aes(y = fct_reorder(engine_brand, mkt_vols), x = source_vol + 1981)) +
+  ggplot(mapping = aes(y = fct_reorder(engine_brand, mkt_vols), x = factor(source_vol + 1981))) +
   geom_point(aes(shape = status)) + scale_shape_identity() + 
-  geom_line(aes(group = engine_brand, colour = mkt_vols)) +
-  labs(title = "entry/exit of engine_brand by longevity, then entry year", 
-       subtitle = "longevity is based on first & last appearance, entry year is first appearance",
+  geom_line(aes(group = engine_brand, alpha = mkt_vols)) +
+  labs(title = "Printer Engine Manufacturers", 
+       subtitle = "arranged by longevity (based on first & last appearance), then entry year (first appearance)",
        x = "year in PC Magazine",
-       y = "Engine Manufacturer")
+       y = "Engine Manufacturer") +
+  guides(alpha=FALSE)
+
+#### http://felixfan.github.io/ggplot2-remove-grid-background-margin/
+plot.engine_entryexit + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black"))
+
+## engine_entryexit+parentco count
+
+plot.engine_entryexit_brands <- df.engine_entryexit %>%
+  ggplot(mapping = aes(y = fct_reorder(engine_brand, mkt_vols), x = factor(source_vol + 81))) +
+  geom_point(aes(shape = status)) + scale_shape_identity() + 
+  geom_line(aes(group = engine_brand, colour = desc(brands_per_engine))) +
+  labs(title = "Number of Printer Brands Supplied to by Engine Manufacturers", 
+       subtitle = "arranged by longevity (based on first & last appearance), then entry year (first appearance)",
+       x = "Year in PC Magazine",
+       y = "Engine Manufacturer",
+       colour = "Total Number of Brands")
+
+
 
 
 
