@@ -11,16 +11,18 @@ path2cache <- here("spreadsheets/cache/allPrinters/")
 
 all_printers <- read_csv(paste0(path2cache, "allPrinters-x1-correct04.csv"))
 
-# parent_co plots ---- 
+# FILTER all_printers ----
+
+## remove unnecessary product_type
+unique(all_printers$product_type)
+
+# PLOTS parent_co ---- 
 
 ## group data set
 
 df.by_parent <- all_printers %>%
   group_by(parent_co) %>%
-  drop_na(source_vol) %>%
-  filter(product_type %in% c("laser", "led", "lcd", "lcs", "laser-copier"))
-
-unique(all_printers$product_type)
+  drop_na(source_vol)
 
 ## generate entry (status == 1), exit (status == 4) indicators, longevity value (mkt_vols)
 
