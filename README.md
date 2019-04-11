@@ -1,12 +1,6 @@
 ## Turning back issues of PC Magazine into Economics
 
-Follow me as I try to extract information on the prices, features and sales of home laser printers from [PC Magazine](https://books.google.com.au/books?id=N09JwLeo7s4C&source=gbs_all_issues_r&cad=1)'s Annual Printer Editions.
-
-I will be documenting my experimentation with various data wrangling tools and methods. This may include: 
-- optical character recognition (OCR) on tables, and text in columns
-- mapping various data structures into a unified dataset
-
-Click here for updates: [@cynthiahqy](https://twitter.com/cynthiahqy)
+Attempts to extract information on the prices, features and sales of home laser printers from [PC Magazine](https://books.google.com.au/books?id=N09JwLeo7s4C&source=gbs_all_issues_r&cad=1)'s Annual Printer Editions.
 
 ### About the Project
 
